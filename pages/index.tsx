@@ -1,9 +1,37 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import Image from "next/image";
+import { Inter } from "next/font/google";
+import { GetStaticPropsContext, GetServerSidePropsContext } from "next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useTranslation } from "next-i18next";
+import { parse } from "accept-language-parser";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
-export default function Home() {
+type Props = {};
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const languages = parse(context.req.headers["accept-language"]);
+
+  // IDEA: when user logs in / changes the language, set the cookie
+  // (asking the user prior for permission)
+  // then we can read such a cookie here instead of checking the user language
+
+  const initialLocale = languages[0].code ?? "en";
+
+  const translations = await serverSideTranslations(initialLocale, ["common"]);
+
+  return {
+    props: {
+      ...translations,
+    } satisfies Props,
+  };
+};
+
+export default function Home(props: Props) {
+  const { t } = useTranslation();
+
   return (
     <main
       className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
@@ -20,7 +48,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            By{' '}
+            By{" "}
             <Image
               src="/vercel.svg"
               alt="Vercel Logo"
@@ -52,7 +80,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
+            {t("docs")}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -69,7 +97,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
+            Learn{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -86,7 +114,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
+            Templates{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -103,7 +131,7 @@ export default function Home() {
           rel="noopener noreferrer"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
+            Deploy{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
@@ -114,5 +142,5 @@ export default function Home() {
         </a>
       </div>
     </main>
-  )
+  );
 }
